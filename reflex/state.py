@@ -2256,6 +2256,7 @@ class StateManagerRedis(StateManager):
             # the top-level state by chasing `parent_state` pointers up the tree.
             if top_level:
                 return self._get_root_state(state)
+            print(f"Fetch {token} for {state.get_full_name()}")
             return state
 
         # TODO: dedupe the following logic with the above block
@@ -2278,6 +2279,7 @@ class StateManagerRedis(StateManager):
         # the top-level state by chasing `parent_state` pointers up the tree.
         if top_level:
             return self._get_root_state(state)
+        print(f"Instantiate {token} for {state.get_full_name()}")
         return state
 
     async def set_state(
@@ -2328,11 +2330,14 @@ class StateManagerRedis(StateManager):
             )
         # Persist only the given state (parents or substates are excluded by BaseState.__getstate__).
         if state._get_was_touched():
+            print(f"Set {client_token} for {state.get_full_name()}")
             await self.redis.set(
                 _substate_key(client_token, state),
                 cloudpickle.dumps(state),
                 ex=self.token_expiration,
             )
+        else:
+            print(f"No changes on {client_token} for {state.get_full_name()}")
 
         # Wait for substates to be persisted.
         for t in tasks:
