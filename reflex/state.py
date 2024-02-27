@@ -1013,6 +1013,11 @@ class BaseState(Base, ABC, extra=pydantic.Extra.allow):
             # unwrap proxy objects when assigning back to the state
             value = value.__wrapped__
 
+        # For now, handle router_data updates as a special case
+        if name == constants.ROUTER_DATA and self.parent_state is not None:
+            setattr(self.parent_state, name, value)
+            return
+
         # Set the var on the parent state.
         inherited_vars = {**self.inherited_vars, **self.inherited_backend_vars}
         if name in inherited_vars:
@@ -1032,12 +1037,11 @@ class BaseState(Base, ABC, extra=pydantic.Extra.allow):
         super().__setattr__(name, value)
 
         # Add the var to the dirty list.
-        if name in self.vars or name in self._computed_var_dependencies:
-            self.dirty_vars.add(name)
-            self._mark_dirty()
-
-        # For now, handle router_data updates as a special case
-        if name == constants.ROUTER_DATA:
+        if (
+            name in self.vars
+            or name in self._computed_var_dependencies
+            or name == constants.ROUTER_DATA
+        ):
             self.dirty_vars.add(name)
             self._mark_dirty()
 
