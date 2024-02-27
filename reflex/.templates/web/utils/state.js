@@ -66,10 +66,15 @@ export const getToken = () => {
   }
   if (typeof window !== 'undefined') {
     if (!window.sessionStorage.getItem(TOKEN_KEY)) {
-      window.sessionStorage.setItem(TOKEN_KEY, generateUUID());
+      const new_token = generateUUID();
+      console.log("Create new client token: ", new_token);
+      window.sessionStorage.setItem(TOKEN_KEY, new_token);
     }
     token = window.sessionStorage.getItem(TOKEN_KEY);
+    console.log("Retrieved existing client token: ", token);
+    return token;
   }
+  console.log("No window object, cannot retrieve token.")
   return token;
 };
 
