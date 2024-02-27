@@ -2336,8 +2336,6 @@ class StateManagerRedis(StateManager):
                 cloudpickle.dumps(state),
                 ex=self.token_expiration,
             )
-        else:
-            print(f"No changes on {client_token} for {state.get_full_name()}")
 
         # Wait for substates to be persisted.
         for t in tasks:
